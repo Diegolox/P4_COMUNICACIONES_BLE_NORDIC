@@ -1,18 +1,20 @@
 #include <Arduino.h>
-
-// put function declarations here:
-int myFunction(int, int);
+#include "hal/BLE.h"
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+    Serial.begin(115200);
+
+    if (!initBLEAdvertising()) {
+        Serial.println("Error al iniciar advertising BLE");
+
+        while (true) {
+            delay(1000);
+        }
+    }
+
+    Serial.println("Advertising iniciado");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+    updateBLE();
 }
