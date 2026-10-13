@@ -31,3 +31,4 @@ bool initBLEAdvertising() {
 void updateBLE() {
     BLE.poll(); // Atiende los eventos BLE.
 }
+
