@@ -1,6 +1,11 @@
 #include <Arduino.h>
 #include <ArduinoBLE.h>
 #include "network/GATT.h"
+#include "hal/LED.h"
+#include "hal/IMU.h"
+
+bool acelerometroActivo = true;
+
 
 //------------------//
 // SERVICIO LED     //
@@ -22,20 +27,32 @@ static BLEByteCharacteristic colorLED(
 
 
 
-//-------------------------------//
-// SERVICIO LECTURA ACELEROMETRO //
-//-------------------------------//
+//-----------------------//
+// SERVICIO ACELEROMETRO //
+//-----------------------//
 
 static BLEService servicioIMU( // CREACION DEL SERVICIO PARA LA IMU
     "44494547-4F00-0000-0000-000000000010"
 );
 
 // Texto x;y;z, con lectura y notificaciones.
-static BLEStringCharacteristic caracteristicaAcelerometro( // CARACTERISTICA IMU
+static BLEStringCharacteristic car_leerAcelerometro( // CARACTERISTICA IMU
     "44494547-4F00-0000-0000-000000000011",
     BLERead | BLENotify,
     20
 );
+
+
+// Control de lectura: 0 desactiva, 1 activa.
+static BLEBoolCharacteristic car_activarAcelerometro(
+    "44494547-4F00-0000-0000-000000000100",
+    BLEWrite
+);
+
+void activarAcelerometro(bool valor) {
+    acelerometroActivo = valor;
+}
+
 
 void actualizarAcelerometroGATT(const Vector3D &aceleracion) {
     char datos[21];
@@ -50,10 +67,8 @@ void actualizarAcelerometroGATT(const Vector3D &aceleracion) {
     );
 
     // Actualiza el valor y notifica al móvil si está suscrito.
-    caracteristicaAcelerometro.writeValue(datos); // guarda datos en la característica
+    car_leerAcelerometro.writeValue(datos); // guarda datos en la característica
 }
-
-
 
 
 //------------------//
@@ -70,30 +85,40 @@ void initGATT() {
     // PONE A CERO EL LED AL INICIO ESCRIBIENDO EN LA CARACTERÍSTICA.
     colorLED.writeValue(0);
     // Añade el servicio al advertising para que el cliente lo vea.
-    BLE.setAdvertisedService(servicioLED); 
+    //BLE.setAdvertisedService(servicioLED); 
 
     //---IMU
     // CREA LA CARACTERISTICA DEL IMU
-    servicioIMU.addCharacteristic(caracteristicaAcelerometro);
+    servicioIMU.addCharacteristic(car_leerAcelerometro);
+car_activarAcelerometro.writeValue(acelerometroActivo);
+
     // AÑADE EL SERVICIO DEL IMU AL GATT
     BLE.addService(servicioIMU);
+
     // PONE A CERO EL VALOR DE LA CARACTERISTICA DEL IMU
-    caracteristicaAcelerometro.writeValue("0.000;0.000;0.000");
-    // AÑADE EL SERVICIO DEL IMU AL ADVERTISING PARA QUE EL CLIENTE LO VEA ANTES DE CONECTARSE.
-    BLE.setAdvertisedService(servicioIMU);
+    car_leerAcelerometro.writeValue("0.000;0.000;0.000");
+
+    car_activarAcelerometro.writeValue(true);
 }
 
 
 void updateGATT() {
-    // Aplica el color recibido del cliente.
+    // Aplica el color recibido.
     if (colorLED.written()) {
         cambiarColorLED(colorLED.value());
     }
 
-    // Publica la aceleración cuando hay una medida nueva.
-    Vector3D aceleracion;
+    // Aplica la orden de activar o desactivar.
+    if (car_activarAcelerometro.written()) {
+        activarAcelerometro(car_activarAcelerometro.value());
+    }
 
-    if (leerAcelerometro(aceleracion)) {
-        actualizarAcelerometroGATT(aceleracion);
+    // Publica las nuevas medidas si está activo.
+    if (acelerometroActivo) {
+        Vector3D aceleracion;
+
+        if (leerAcelerometro(aceleracion)) {
+            actualizarAcelerometroGATT(aceleracion);
+        }
     }
 }
