@@ -4,7 +4,7 @@
 #include <ArduinoBLE.h>
 
 // Devuelve true si inicia el advertising.
-bool initBLEAdvertising();
+bool initBLE();
 
 // Llamar desde loop().
 void updateBLE();

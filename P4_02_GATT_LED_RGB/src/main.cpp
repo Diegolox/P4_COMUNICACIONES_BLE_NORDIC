@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "hal/BLE.h"
 #include "hal/LED.h"
-#include "network/GATT.h"
 
 
 void setup() {
@@ -9,9 +8,7 @@ void setup() {
 
     Serial.begin(115200);
 
-    initGATT();
-
-    if (!initBLEAdvertising()) {
+    if (!initBLE()) {
         Serial.println("Error al iniciar advertising BLE");
 
         while (true) {
