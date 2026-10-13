@@ -41,3 +41,4 @@ bool leerMagnetometro(Vector3D &campoMagnetico)
 
     return true;
 }
+
