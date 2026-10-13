@@ -6,58 +6,76 @@
 
 bool acelerometroActivo = true;
 
+// GATT organiza los servicios y el acceso a sus características.
+// Un servicio agrupa características relacionadas.
+// Una característica contiene un valor y define sus operaciones.
+// Un descriptor añade información sobre una característica.
+
 
 //------------------//
 // SERVICIO LED     //
 //------------------//
 
-// EL GATT ES EL CONJUNTO DE SERVICIOS DE LA APLICACIÓN
-// LOS SERVICIOS SON MEROS CONJUNTOS DE CARACTERÍSTICAS. LAS CARACTERÍSITCAS SOLO PUEDEN PERTENECER A UN SERVICIO
-// Servicio de control del LED RGB.
 static BLEService servicioLED(
-    "44494547-4F00-0000-0000-000000000000" // UUID del servicio, codificado en ASCII como "DIEGO"
+    "44494547-4F00-0000-0000-000000000000" // Primeros bytes: "DIEGO" en ASCII.
 );
 
-// CARACTERÍSTICA ES UN DATO QUE PUEDO LEER O ESCRIBIR
-// 0 apagado, 1 rojo, 2 verde, 3 azul.
+// Color: 0 apagado, 1 rojo, 2 verde, 3 azul.
 static BLEByteCharacteristic colorLED(
-    "44494547-4F00-0000-0000-000000000001", // UUID de la característica.
-    BLERead | BLEWrite // Configura la característica para ser de lectura y escritura.
+    "44494547-4F00-0000-0000-000000000001",
+    BLERead | BLEWrite // Permite leer y escribir desde el cliente.
 );
 
+// Descriptor 2901: descripción textual del valor.
+static BLEDescriptor descripcionLED(
+    "2901",
+    "Color LED: 0 apagado, 1 rojo, 2 verde, 3 azul"
+);
 
 
 //-----------------------//
 // SERVICIO ACELEROMETRO //
 //-----------------------//
 
-static BLEService servicioIMU( // CREACION DEL SERVICIO PARA LA IMU
+static BLEService servicioIMU(
     "44494547-4F00-0000-0000-000000000010"
 );
 
-// Texto x;y;z, con lectura y notificaciones.
-static BLEStringCharacteristic car_leerAcelerometro( // CARACTERISTICA IMU
+// Medidas en texto: x;y;z.
+static BLEStringCharacteristic car_leerAcelerometro(
     "44494547-4F00-0000-0000-000000000011",
-    BLERead | BLENotify,
-    20
+    BLERead | BLENotify, // Permite leer y suscribirse a actualizaciones.
+    20 // Máximo 20 bytes de texto.
 );
 
+// Descriptor: explica el orden de los ejes y su unidad.
+static BLEDescriptor descripcionAcelerometro(
+    "2901",
+    "Aceleracion X;Y;Z en g"
+);
 
-// Control de lectura: 0 desactiva, 1 activa.
+// Control: 0 detiene las lecturas, 1 las reanuda.
 static BLEBoolCharacteristic car_activarAcelerometro(
     "44494547-4F00-0000-0000-000000000100",
-    BLEWrite
+    BLEWrite // Permite enviar la orden desde el cliente.
 );
+
+// Descriptor: explica los valores de la orden.
+static BLEDescriptor descripcionActivacion(
+    "2901",
+    "Acelerometro: 0 desactiva, 1 activa"
+);
+
 
 void activarAcelerometro(bool valor) {
     acelerometroActivo = valor;
 }
 
-
 void actualizarAcelerometroGATT(const Vector3D &aceleracion) {
-    char datos[21];
+    char datos[21]; // Texto y terminador '\0'.
 
-    snprintf( // convierte lectura del acelerómetro a 0.000;0.000;0.000 y lo guarda en datos
+    // Formatea los tres ejes con tres decimales.
+    snprintf(
         datos,
         sizeof(datos),
         "%.3f;%.3f;%.3f",
@@ -66,8 +84,8 @@ void actualizarAcelerometroGATT(const Vector3D &aceleracion) {
         aceleracion.z
     );
 
-    // Actualiza el valor y notifica al móvil si está suscrito.
-    car_leerAcelerometro.writeValue(datos); // guarda datos en la característica
+    // Guarda la medida y notifica al cliente suscrito.
+    car_leerAcelerometro.writeValue(datos);
 }
 
 
@@ -76,44 +94,38 @@ void actualizarAcelerometroGATT(const Vector3D &aceleracion) {
 //------------------//
 
 void initGATT() {
-    //---LED RGB
-    // Añade la característica y registra el servicio.
+    // Asocia las descripciones a sus características.
+    colorLED.addDescriptor(descripcionLED);
+    car_leerAcelerometro.addDescriptor(descripcionAcelerometro);
+    car_activarAcelerometro.addDescriptor(descripcionActivacion);
+
+    // Añade la característica al servicio LED y registra el servicio.
     servicioLED.addCharacteristic(colorLED);
-    // añade el servicio al GATT para que el cliente lo vea una vez conectado.
     BLE.addService(servicioLED);
 
-    // PONE A CERO EL LED AL INICIO ESCRIBIENDO EN LA CARACTERÍSTICA.
-    colorLED.writeValue(0);
-    // Añade el servicio al advertising para que el cliente lo vea.
-    //BLE.setAdvertisedService(servicioLED); 
-
-    //---IMU
-    // CREA LA CARACTERISTICA DEL IMU
+    // Añade las características al servicio IMU y registra el servicio.
     servicioIMU.addCharacteristic(car_leerAcelerometro);
-car_activarAcelerometro.writeValue(acelerometroActivo);
-
-    // AÑADE EL SERVICIO DEL IMU AL GATT
+    servicioIMU.addCharacteristic(car_activarAcelerometro);
     BLE.addService(servicioIMU);
 
-    // PONE A CERO EL VALOR DE LA CARACTERISTICA DEL IMU
+    // Inicializa los valores almacenados en las características.
+    colorLED.writeValue(0);
     car_leerAcelerometro.writeValue("0.000;0.000;0.000");
-
-    car_activarAcelerometro.writeValue(true);
+    car_activarAcelerometro.writeValue(acelerometroActivo);
 }
 
-
 void updateGATT() {
-    // Aplica el color recibido.
+    // Aplica el color escrito por el cliente.
     if (colorLED.written()) {
         cambiarColorLED(colorLED.value());
     }
 
-    // Aplica la orden de activar o desactivar.
+    // Aplica la orden antes de comprobar el sensor.
     if (car_activarAcelerometro.written()) {
         activarAcelerometro(car_activarAcelerometro.value());
     }
 
-    // Publica las nuevas medidas si está activo.
+    // Publica solo medidas nuevas mientras la lectura esté activa.
     if (acelerometroActivo) {
         Vector3D aceleracion;
 
