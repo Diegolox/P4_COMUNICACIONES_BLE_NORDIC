@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#include "hal/BLUETOOTH.h
+#include "protocol/chat_bluetooth.h"
+#include "hal/bluetooth.h"
 
 void setup() {
     Serial.begin(115200);
@@ -7,6 +8,5 @@ void setup() {
 }
 
 void loop() {
-    leerBluetooth();
-    escribirBluetooth();
+    eco_mensaje();
 }

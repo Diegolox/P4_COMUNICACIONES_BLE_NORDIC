@@ -1,43 +1,38 @@
-#include <Arduino.h>
 #include <BluetoothSerial.h>
-#include "hal/BLUETOOTH.h"
+#include "hal/bluetooth.h"
 
-// Solo se utilizan dentro de este archivo.
 static BluetoothSerial bluetooth;
-static String mensaje = "";
-static bool mensajeCompleto = false;
 
 void initBluetooth() {
     bluetooth.begin("ESP32-Chat");
 }
 
-// Recibe texto y detecta el final del mensaje.
-void leerBluetooth() {
-    if (bluetooth.available()) {
-        char caracter = bluetooth.read();
-        Serial.write(caracter);
+// Llamar en cada vuelta del loop().
+// Devuelve el mensaje al recibir Enter, o "" si todavía está incompleto.
+// Cada llamada lee un char del buffer bluetooth y lo acumula hasta recibir el salto de linea
+String leerBluetooth() {
+    // Conserva los caracteres recibidos entre llamadas.
+    static String buffer = "";
 
-        if (caracter == '\r' || caracter == '\n') {
-            if (mensaje.length() > 0) {
-                mensajeCompleto = true;
-            }
-        } else {
-            mensaje += caracter;
-        }
+    if (!bluetooth.available()) {
+        return ""; // No hay datos nuevos.
     }
+
+    char caracter = bluetooth.read();
+
+    // Acumula el texto hasta recibir un salto de línea (CR o LF).
+    if (caracter != '\r' && caracter != '\n') {
+        buffer += caracter;
+        return "";
+    }
+
+    // Devuelve el mensaje y prepara el buffer para el siguiente.
+    String mensaje = buffer;
+    buffer = "";
+    return mensaje;
 }
 
-// Envía el texto del USB y el eco del mensaje recibido.
-void escribirBluetooth() {
-    if (Serial.available()) {
-        bluetooth.write(Serial.read());
-    }
-
-    if (mensajeCompleto) {
-        bluetooth.print("eco-");
-        bluetooth.println(mensaje);
-
-        mensaje = "";
-        mensajeCompleto = false;
-    }
+// Envía el mensaje con un salto de línea.
+void escribirBluetooth(String mensaje) {
+    bluetooth.println(mensaje);
 }

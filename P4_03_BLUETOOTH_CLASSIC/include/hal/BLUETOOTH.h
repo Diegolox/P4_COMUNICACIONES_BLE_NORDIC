@@ -1,5 +1,6 @@
 #pragma once
+#include <Arduino.h>
 
 void initBluetooth();
-void leerBluetooth();
-void escribirBluetooth();
+String leerBluetooth();
+void escribirBluetooth(String mensaje);
