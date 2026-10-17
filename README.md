@@ -37,6 +37,7 @@ El servicio de la IMU ofrece la aceleración en formato `x;y;z`, expresada en **
     width="75%">
   </video>
 </p>
+
 > **Conexión móvil-ESP32 mediante nrf connect**
 
 
