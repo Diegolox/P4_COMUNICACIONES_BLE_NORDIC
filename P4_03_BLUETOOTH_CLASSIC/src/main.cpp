@@ -1,15 +1,21 @@
 #include <Arduino.h>
-#include "config.h"
-#include "hal/LED.h"
-#include "app/tareas.h"
+#include <BluetoothSerial.h>
+
+BluetoothSerial bluetooth;
 
 void setup() {
-    Serial.begin(BAUDRATE_SERIAL);
-    init_led_ESP32();
-
-    init_task_hola_mundo();
-    init_task_blink_led();
+    Serial.begin(115200);        // Comunicación USB con el monitor serie.
+    bluetooth.begin("ESP32-Chat"); // Nombre visible por Bluetooth.
 }
 
 void loop() {
+    // USB → Bluetooth.
+    if (Serial.available()) {
+        bluetooth.write(Serial.read());
+    }
+
+    // Bluetooth → USB.
+    if (bluetooth.available()) {
+        Serial.write(bluetooth.read());
+    }
 }
