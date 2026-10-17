@@ -29,7 +29,6 @@ El servicio de la IMU ofrece la aceleración en formato `x;y;z`, expresada en **
 <!-- Sustituir el marcador anterior por: ![Estructura GATT](docs/gatt.png) -->
 
 
-> **Conexión móvil-ESP32 mediante nrf connect**
 
 <p align="center">
   <video
@@ -38,10 +37,10 @@ El servicio de la IMU ofrece la aceleración en formato `x;y;z`, expresada en **
     width="75%">
   </video>
 </p>
+> **Conexión móvil-ESP32 mediante nrf connect**
 
 
 
-> **Lectura de datos del IMU y escritura en la característica led**
 
 <p align="center">
   <video
@@ -50,6 +49,7 @@ El servicio de la IMU ofrece la aceleración en formato `x;y;z`, expresada en **
     width="75%">
   </video>
 </p>
+> **Lectura de datos del IMU y escritura en la característica led**
 
 
 
