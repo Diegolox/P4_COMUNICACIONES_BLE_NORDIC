@@ -12,10 +12,6 @@ El *advertising* permite que un dispositivo BLE anuncie su presencia sin estable
 
 `initBLEAdvertising()` configura e inicia el anuncio. Después, `updateBLE()` llama a `BLE.poll()` para atender los eventos de comunicación. El dispositivo puede descubrirse desde una aplicación como nRF Connect.
 
-> **DIAGRAMA PENDIENTE:** anuncio del Nano y detección desde el móvil.
-
-<!-- Sustituir el marcador anterior por: ![Advertising BLE](docs/advertising.png) -->
-
 ## 2. GATT: LED RGB y acelerómetro
 
 Proyecto: [P4_02_GATT](P4_02_GATT).
@@ -31,6 +27,31 @@ El servicio de la IMU ofrece la aceleración en formato `x;y;z`, expresada en **
 > **DIAGRAMA PENDIENTE:** árbol GATT con los servicios LED e IMU y sus características.
 
 <!-- Sustituir el marcador anterior por: ![Estructura GATT](docs/gatt.png) -->
+
+
+> **Conexión móvil-ESP32 mediante nrf connect**
+
+<p align="center">
+  <video
+    src="https://github.com/user-attachments/assets/273c994d-3270-49c2-8eca-0aa6892530ba"
+    controls
+    width="75%">
+  </video>
+</p>
+
+
+
+> **Lectura de datos del IMU y escritura en la característica led**
+
+<p align="center">
+  <video
+    src="https://github.com/user-attachments/assets/cd78442c-7eb3-4d31-be75-4a8e5c907a2e"
+    controls
+    width="75%">
+  </video>
+</p>
+
+
 
 ## 3. Bluetooth Classic: eco de mensajes
 
