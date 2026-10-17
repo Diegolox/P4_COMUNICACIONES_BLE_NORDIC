@@ -1,4 +1,4 @@
-# P4 · Comunicaciones Bluetooth
+# P4 Comunicaciones Bluetooth
 
 Práctica de comunicación inalámbrica con **Bluetooth Low Energy (BLE)** en Arduino Nano 33 BLE y **Bluetooth Classic** en ESP32. Se trabaja el descubrimiento de dispositivos, el acceso a datos mediante GATT y el intercambio de mensajes mediante un puerto serie Bluetooth.
 
