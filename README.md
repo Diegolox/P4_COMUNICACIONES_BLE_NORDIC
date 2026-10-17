@@ -24,29 +24,55 @@ El <em>advertising</em> permite que un dispositivo BLE anuncie su presencia ante
 
 Proyecto: [P4_02_GATT](P4_02_GATT). Incluye las tareas 2, 3 y 4 del guion.
 
+<table>
+<tr>
+<td width="270" align="center" valign="top">
+  <a href="doc/img/DIAGRAMA_GATT.png"><img src="doc/img/DIAGRAMA_GATT.png" alt="GATT del Nano: dos servicios y tres características" width="250"></a>
+</td>
+<td valign="top">
 <p align="justify">
-El Nano actúa como <strong>periférico y servidor GATT</strong>, y el móvil accede a sus datos como cliente. Un servicio agrupa características relacionadas; cada característica contiene un valor y establece las operaciones permitidas. Los servicios y las características tienen sus propios UUID, y los descriptores añaden información sobre el significado de los datos.
+El Nano actúa como <strong>periférico y servidor GATT</strong>, y el móvil accede a sus datos como cliente. Un servicio agrupa características relacionadas; cada característica contiene un valor y define las operaciones permitidas. Los servicios y las características tienen sus propios UUID. Los descriptores añaden información sobre los datos.
 </p>
-
-<p align="center">
-  <img src="doc/img/DIAGRAMA_GATT.png" alt="GATT del Nano: servicio LED con una característica de color y servicio IMU con características de aceleración y activación" width="360">
-</p>
-
 <p align="justify">
-El diagrama muestra los dos servicios y sus tres características. El servicio LED permite consultar y modificar el color. En el servicio IMU, la aceleración se publica como texto <code>x;y;z</code>, en <strong>g</strong>, con permisos de <strong>lectura y notificación</strong>. Al suscribirse, el cliente recibe las nuevas medidas sin tener que solicitarlas una a una. La característica de activación es <strong>solo de escritura</strong>: <code>0</code> detiene las lecturas y <code>1</code> las reanuda; no corta la alimentación del sensor.
+El diagrama representa <strong>dos servicios y tres características</strong>. El servicio LED permite consultar y modificar el color: <code>0</code> apagado, <code>1</code> rojo, <code>2</code> verde y <code>3</code> azul.
 </p>
-
 <p align="justify">
-<code>initGATT()</code> registra los servicios, características y descriptores. Durante la ejecución, <code>updateGATT()</code> aplica las órdenes de color y activación, y actualiza la aceleración cuando hay una medida nueva y las lecturas están habilitadas.
+En el servicio IMU, la aceleración se publica como texto <code>x;y;z</code>, en <strong>g</strong>, con permisos de <strong>lectura y notificación</strong>. Al suscribirse, el cliente recibe las nuevas medidas sin solicitarlas una a una.
 </p>
+<p align="justify">
+La característica de activación es <strong>solo de escritura</strong>: <code>0</code> detiene las lecturas y <code>1</code> las reanuda; no corta la alimentación del sensor.
+</p>
+<p align="justify">
+<code>initGATT()</code> registra los servicios, características y descriptores. <code>updateGATT()</code> aplica las órdenes recibidas y publica las nuevas medidas mientras las lecturas están habilitadas.
+</p>
+</td>
+</tr>
+</table>
 
-**Conexión del móvil al Nano 33 BLE mediante nRF Connect**
+### Demostraciones
+
+<table>
+<tr>
+<td width="50%" align="center" valign="top">
+<strong>Descubrimiento y conexión</strong>
 
 https://github.com/user-attachments/assets/273c994d-3270-49c2-8eca-0aa6892530ba
 
-**Lectura del acelerómetro y escritura del color del LED**
+<p align="justify">
+Conexión del móvil al Nano 33 BLE desde nRF Connect para acceder a sus servicios y características.
+</p>
+</td>
+<td width="50%" align="center" valign="top">
+<strong>Lectura y control del LED</strong>
 
 https://github.com/user-attachments/assets/cd78442c-7eb3-4d31-be75-4a8e5c907a2e
+
+<p align="justify">
+Consulta de la aceleración y escritura del color del LED. Las notificaciones permiten recibir las nuevas medidas al suscribirse a la característica.
+</p>
+</td>
+</tr>
+</table>
 
 ## 3. Bluetooth Classic: eco de mensajes por SPP
 
@@ -57,7 +83,7 @@ El ESP32 utiliza <code>BluetoothSerial</code> y el perfil <strong>SPP (Serial Po
 </p>
 
 <p align="center">
-  <img src="doc/img/DIAGRAMA_CONEXION_PC_MICROCONTROLADOR.png" alt="Comunicación SPP: el PC envía HOLA al ESP32 y recibe ECO-HOLA" width="760">
+  <img src="doc/img/DIAGRAMA_CONEXION_PC_MICROCONTROLADOR.png" alt="Comunicación SPP: el PC envía HOLA al ESP32 y recibe ECO-HOLA" width="620">
 </p>
 
 <p align="justify">
